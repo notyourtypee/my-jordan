@@ -1,0 +1,369 @@
+<?php
+  include "../functions.php";
+	cekLoginUser();
+  $user_id = $_SESSION['user_id'];
+  
+  $cartProduk = query("SELECT cart.*, produk.*
+                FROM cart
+                JOIN produk ON cart.produk_id = produk.id_produk
+                WHERE user_id='$user_id'");
+  
+  $totalHarga = 0;
+  $jumlahBarang = 0;
+
+  foreach ($cartProduk as $cart) {
+      $totalHarga += $cart['harga'];
+      $jumlahBarang++;
+  }
+
+  if (isset($_POST['hapusCart'])) {
+    $idCart = $_POST['idCart'];
+    $result = mysqli_query($conn, "DELETE FROM `cart`  WHERE id_cart=$idCart");
+    if($result){
+      header("Location: cart.php");
+      exit;
+    }
+  }
+
+  $idPesanan = $_GET['idPesanan'];
+
+  $pesanan = query("SELECT * FROM `pesanan` WHERE id_pesanan='$idPesanan'")[0];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+
+    <!--========== BOX ICONS ==========-->
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css" rel="stylesheet" />
+
+    <!--========== CSS ==========-->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <!--========== CSS SLICK ==========-->
+    <link rel="stylesheet" type="text/css" href="assets/css/slick.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/slick-theme.css" />
+
+    <title>website Jordan</title>
+  </head>
+  <body>
+    <!--========== SCROLL TOP ==========-->
+    <a href="#" class="scrolltop" id="scroll-top">
+      <i class="bx bx-chevron-up scrolltop__icon"></i>
+    </a>
+
+    <!--========== HEADER ==========-->
+    <header class="l-header" id="header">
+      <nav class="nav bd-container">
+        <div class="nav__toggle" id="nav-toggle">
+          <i class="bx bx-menu"></i>
+        </div>
+
+        <a href="#" class="nav__logo">Jordan</a>
+
+        <div class="nav__menu" id="nav-menu">
+          <ul class="nav__list">
+            <li class="nav__item"><a href="index.php" class="nav__link active-link">Home</a></li>
+            <li class="nav__item"><a href="#about" class="nav__link">About</a></li>
+            <li class="nav__item"><a href="#services" class="nav__link">Quality</a></li>
+            <li class="nav__item"><a href="#products" class="nav__link">Product</a></li>
+            <li class="nav__item"><a href="#size" class="nav__link">Size Chart</a></li>
+            <li class="nav__item"><a href="#contact" class="nav__link">Contact us</a></li>
+
+            <li><i class="bx bx-toggle-left change-theme" id="theme-button"></i></li>
+            <li class="nav__item"><a href="../logout.php" class="nav__link">Logout</a></li>
+            
+          </ul>
+        </div>
+
+        <div class="nav__shop">
+          <a href="#" class="nav__icon">
+            <i class="bx bx-shopping-bag"></i>
+            <span><?=$jumlahBarang?></span>
+          </a>
+
+          <div class="nav__shop-content">
+            <div class="title_shop">
+              <span>Keranjang Belanja</span>
+            </div>
+            <?php if ($jumlahBarang != 0) : ?>
+              <?php foreach ($cartProduk as $index => $cp): ?>
+                <div class="item">
+                  <div class="image_cart">
+                    <div class="image_c">
+                      <img src="../images/produk/<?= $cp['gambar1']?>" alt="" />
+                    </div>
+                  </div>
+                  <div class="description">
+                    <span><?= $cp['nama_produk']?></span>
+                  </div>
+                  <div class="total-price">Rp. <?= number_format($cp['harga'], 0, ',', '.'); ?></div>
+                  <form action="" method="post" class="d-inline">
+                    <input type="hidden" name="idCart" value="<?= $cp['id_cart'] ?>">
+                    <button type="submit" name="hapusCart" class="border-0 bg-transparent" onclick="return confirm('Yakin Ingin Menghapus?')">
+                      <i class="bx bx-x"></i>
+                    </button>
+                  </form>
+                </div>
+              <?php endforeach ?>
+            <?php else: ?>
+              <h6 class="w-100" style="white-space: nowrap;">
+                Belum Ada Produk Yang Ditambahkan
+              </h6>
+            <?php endif ?>
+            <div class="total-all">
+              <span>Total</span>
+              <span>Rp. <?= number_format($totalHarga, 0, ',', '.'); ?></span>
+            </div>
+            <div class="btn-viewcard">
+              <a href="cart.php" class="button-top">View Card</a>
+            </div>
+            <div class="btn-checkout">
+              <a href="cart.php" class="button-top2">Check Out</a>
+            </div>
+          </div>
+        </div>  
+      </nav>
+    </header>
+
+    <main class="l-main">
+      <!--========== PAGINATION ==========-->
+      <section class="section bd-container" id="breadcrumb">
+        <div class="bd-grid breadcrumb">
+          <div class="breadcrumb">
+            <li>
+              <a href="#"> <i class="bx bxs-home"></i> Home</a>
+            </li>
+            <li>Detail Pembayaran</li>
+          </div>
+          <div class="breadcrumb-pagination"></div>
+        </div>
+      </section>
+
+      <section id="header-informasi">
+      <div class="container">
+        <div class="row shadow p-3 justify-content-center">
+          <div class="col-md-3">
+            <div class="row text-center">
+              <div class="col-12">
+                <p>Tanggal Pembelian</p>
+              </div>
+              <div class="col-12">
+                <p><?= $pesanan['tanggal_pembelian'] ?></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="row text-center">
+              <div class="col-12">
+                <p>Nomor Pesanan</p>
+              </div>
+              <div class="col-12">
+                <p><?= $pesanan['id_pesanan'] ?></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 text-center">
+            <div class="row text-center">
+              <div class="col-12">
+                <p>Metode Pembayaran</p>
+              </div>
+              <div class="col-12">
+                  <?php if ($pesanan['pembayaran'] == 1) :?>
+                    BCA
+                  <?php elseif($pesanan['pembayaran'] == 2): ?>
+                    BNI
+                  <?php elseif($pesanan['pembayaran'] == 3): ?>
+                    BRI
+                  <?php elseif($pesanan['pembayaran'] == 4): ?>
+                    Mandiri
+                  <?php endif ?>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div>
+              <?php if ($pesanan['pembayaran'] == 1) :?>
+                <img src="assets/img/payment1.png" alt="img" class="img-fluid"/>
+              <?php elseif($pesanan['pembayaran'] == 2): ?>
+                <img src="assets/img/payment2.png" alt="img" class="img-fluid"/>
+              <?php elseif($pesanan['pembayaran'] == 3): ?>
+                <img src="assets/img/payment3.png" alt="img" class="img-fluid"/>
+              <?php elseif($pesanan['pembayaran'] == 4): ?>
+                <img src="assets/img/payment4.png" alt="img" class="img-fluid"/>
+              <?php endif ?>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="informasi">
+      <div class="container">
+        <div class="row card shadow p-4 mt-3">
+          <div class="col-md-12">
+            <h4 class="card-header">Detail</h4>
+            <div class="card-body">
+              <div class="col-12 col-md-6">
+                <table class="table table-borderless table-responsive">
+                  <tbody>
+                    <tr>
+                      <td>Total</td>
+                      <td>:</td>
+                      <td>Rp. <?= number_format($pesanan['total'], 0, ',', '.'); ?></td>
+                    </tr>
+                    <tr>
+                      <td>Nomor Rekening</td>
+                      <td>:</td>
+                      <td>2208 1996 1403</td>
+                    </tr>
+                    <tr>
+                      <td>Nama penerima</td>
+                      <td>:</td>
+                      <td><?= $pesanan['nama_lengkap'] ?></td>
+                    </tr>
+                    <tr>
+                      <td>Pajak</td>
+                      <td>:</td>
+                      <td>10%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card-footer text-body-secondary">
+                <div class="row">
+                    <div class="col-md-6">
+                        <Strong>Total Pembayaran</Strong>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <Strong>Rp. <?= number_format($pesanan['total'], 0, ',', '.'); ?></Strong>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-3">
+      <div class="container">
+        <a href="success.php" class="btn text-white w-100" style="background-color: #012D80;">Lanjut</a>
+      </div>
+    </section>
+    </main>
+
+    <!--========== FOOTER ==========-->
+    <footer class="footer section bd-container">
+      <div class="footer__container bd-grid">
+        <div class="footer__content">
+          <a href="#" class="footer__logo">Jordan</a>
+          <span class="footer__description">Store</span>
+          <div>
+            <a href="#" class="footer__social"><i class="bx bxl-facebook"></i></a>
+            <a href="#" class="footer__social"><i class="bx bxl-instagram"></i></a>
+            <a href="#" class="footer__social"><i class="bx bxl-twitter"></i></a>
+          </div>
+        </div>
+
+        <div class="footer__content">
+          <h3 class="footer__title">Services</h3>
+          <ul>
+            <li><a href="#" class="footer__link">Shipping And Returns</a></li>
+            <li><a href="#" class="footer__link">Measurement Guide</a></li>
+            <li><a href="#" class="footer__link">Size Conversion Chart</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__content">
+          <h3 class="footer__title">Information</h3>
+          <ul>
+            <li><a href="#" class="footer__link">Event</a></li>
+            <li><a href="#" class="footer__link">Contact us</a></li>
+            <li><a href="#" class="footer__link">Privacy policy</a></li>
+            <li><a href="#" class="footer__link">Terms of services</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__content">
+          <h3 class="footer__title">Adress</h3>
+          <ul>
+            <li>Jl. Kopo Katapang KM 12.8</li>
+            <li>Bandung 40971 - Indonesia</li>
+            <li>Phone : +62-22 5891445</li>
+            <li>WhatsApp : 08112406969</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="footer__copy">&#169; 2023 Muhammad Atha Nassa. All right reserved</p>
+    </footer>
+
+    <!--========== SCROLL REVEAL ==========-->
+    <script src="https://unpkg.com/scrollreveal"></script>
+
+    <!--========== MAIN JS ==========-->
+    <script src="assets/js/main.js"></script>
+
+    <!--========== JS SLICK ==========-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="assets/js/slick.js"></script>
+    <script src="assets/js/slick.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+    <script>
+      $(".slick_two").slick({
+        dots: true,
+        arrows: true,
+        infiniite: true,
+        autoplay: true,
+        speed: 2000,
+        autoplaySpeed: 2000,
+        responsive: [
+          {
+            breakpoint: 5000,
+            settings: {
+              slidesToShow: 3,
+              slidesToScroll: 1,
+            },
+          },
+          {
+            breakpoint: 768,
+            settings: {
+              slidesToShow: 2,
+              slidesToScroll: 1,
+            },
+          },
+        ],
+      });
+
+      $(".multiple-items").slick({
+        infinite: true,
+        slidesToShow: 3,
+        slidesToScroll: 3,
+      });
+
+      /*---Single Product---*/
+      $(".product-thumbs-track .pt").on("click", function () {
+        $(".product-thumbs-track .pt").removeClass("active");
+        $(this).addClass("active");
+        var imgurl = $(this).data("imgbigurl");
+        var bigImg = $(".product-big-img").attr("src");
+        if (imgurl != bigImg) {
+          $(".product-big-img").attr({
+            src: imgurl,
+          });
+          $(".zoomImg").attr({
+            src: imgurl,
+          });
+        }
+      });
+
+      $(".product-pic-zoom").zoom();
+    </script>
+  </body>
+</html>

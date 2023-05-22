@@ -1,0 +1,36 @@
+body{
+    background-color: #fffffe;
+}
+
+.navbar{
+    background-color: #094067;
+}
+
+#offcanvasNavbar {
+  width: 30%;
+}
+
+@media (max-width: 768px) {
+  #offcanvasNavbar {
+    width: 75%;
+  }
+}
+.icn-akun {
+  width: 35px;
+  height: 35px;
+}
+
+/* Setting Link */
+a {
+  text-decoration: none;
+  color: rgb(250, 250, 250);
+}
+
+.logout a {
+  text-decoration: none;
+  color: rgb(2, 2, 2);
+}
+
+#header-informasi{
+    margin-top: 100px;
+}
